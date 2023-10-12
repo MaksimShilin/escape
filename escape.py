@@ -16,9 +16,6 @@ class GameSprite(sprite.Sprite):
         self.fps = 40
     def reset(self):
         window.blit(self.image, (self.rect.x, self.rect.y))
-        self.fps -= 1
-        if self.fps <= 0:
-            self.fire = True
 
 
 
@@ -40,13 +37,7 @@ class Enemy(GameSprite):
     def __init__(self, player_image, player_x, player_y, player_speed=0, image_wight=0, image_height=0, hearts=1):
         super().__init__(player_image, player_x, player_y, player_speed, image_wight, image_height)
         self.hearts = hearts
-    def update(self):
-        self.rect.y += self.speed
-        if self.rect.y > 740:
-            self.rect.y = -70
-            global skip
-            skip += 1
-            self.rect.x = randint(30, 380)
+
 
 class Button():
     def __init__(self, x, y, wight, height, color):
@@ -77,6 +68,15 @@ def lose():
     global end
     end = False
 
+def ground():
+    global grounds
+    for ground in grounds:
+        grounds.kill(ground)
+    ground1 = GameSprite('ground.png', 90, 320, 0, 625, 30)
+    ground2 = GameSprite('ground.png', 0, 210, 0, 625, 30)
+    ground3 = GameSprite('ground.png', 90, 100, 0, 625, 30)
+    grounds.add(ground1, ground2, ground3)
+
     
 
 
@@ -87,19 +87,20 @@ display.set_caption('Побег')
 background = transform.scale(image.load('background2.jpg'), (x, y))
 window.blit(background, (0,0))
 
-hero = Player('herorun.png', 190, 300, 2, 45, 70, 3)
+hero = Player('herorun.png', 80, 350, 2, 45, 70, 3)
+enemy = Enemy('enemygo.png', 620, 350, 1, 55, 55, 1)
 
 
 
+grounds = sprite.Group()
+ground()
 
-
-
-start = Button(150, 300, 150, 65, (255, 255, 255))
+start = Button(280, 200, 150, 65, (255, 255, 255))
 start.draw_rect((0, 0, 0))
 start.create_text(40)
 start.draw_text((0, 0, 0), 'START', 30, 20)
 
-restart = Button(150, 300, 150, 65, (255, 255, 255))
+restart = Button(280, 200, 150, 65, (255, 255, 255))
 
 
 
@@ -113,6 +114,14 @@ while game:
         window.blit(background, (0,0))
         hero.reset()
         hero.move()
+        enemy.reset()
+        grounds.draw(window)
+        
+        hits = sprite.spritecollide(hero, grounds, False)
+        for hit in hits:
+            pass
+    
+    
     for e in event.get():
         if e.type == MOUSEBUTTONDOWN and e.button == 1:
             x_button, y_button = e.pos
